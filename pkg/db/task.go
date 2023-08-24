@@ -7,7 +7,7 @@ type Task struct {
 	ID      uint
 	Name    string
 	Project string
-	status  string
+	Status  string
 	Created time.Time
 }
 

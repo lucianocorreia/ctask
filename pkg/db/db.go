@@ -39,3 +39,30 @@ func (t *TaskDB) Insert(name, project string) error {
 
 	return err
 }
+
+func (t *TaskDB) GetTasks() ([]Task, error) {
+	var tasks []Task
+	rows, err := t.DB.Query("SELECT * FROM tasks")
+	if err != nil {
+		return tasks, fmt.Errorf("error getting tasks: %w", err)
+	}
+
+	for rows.Next() {
+		var task Task
+		err := rows.Scan(
+			&task.ID,
+			&task.Name,
+			&task.Project,
+			&task.Status,
+			&task.Created,
+		)
+
+		if err != nil {
+			return tasks, err
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	return tasks, nil
+}

@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/lucianocorreia/ctm/pkg/db"
 	"github.com/lucianocorreia/ctm/pkg/utils"
 	"github.com/spf13/cobra"
@@ -11,6 +13,7 @@ func init() {
 	addCMD.Flags().StringP("project", "p", "", "Project name")
 
 	RootCMD.AddCommand(addCMD)
+	RootCMD.AddCommand(listCMD)
 }
 
 // RootCMD is the root command for ctm
@@ -43,6 +46,26 @@ var addCMD = &cobra.Command{
 			return err
 		}
 
+		return nil
+	},
+}
+
+var listCMD = &cobra.Command{
+	Use:   "list",
+	Short: "List all tasks",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		t, err := db.OpenDB(utils.SetupPath())
+		if err != nil {
+			return err
+		}
+		defer t.DB.Close()
+		tasks, err := t.GetTasks()
+		if err != nil {
+			return err
+		}
+		table := setupTable(tasks)
+		fmt.Print(table.View())
 		return nil
 	},
 }
