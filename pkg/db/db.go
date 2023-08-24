@@ -1,8 +1,41 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+	"time"
 
-type TaskDB struct {
-	db      *sql.DB
-	dataDir string
+	_ "github.com/mattn/go-sqlite3"
+)
+
+// OpenDB opens the database, and creates the table if it doesn't exist
+func OpenDB(path string) (*TaskDB, error) {
+	db, err := sql.Open("sqlite3", fmt.Sprintf("%s/tasks.db", path))
+	if err != nil {
+		return nil, err
+	}
+
+	t := TaskDB{db, path}
+
+	if !t.tableExists("tasks") {
+		err := t.createTableTasks()
+		if err != nil {
+			defer db.Close()
+			return nil, err
+		}
+	}
+
+	return &t, nil
+}
+
+// Insert inserts a new task into the database
+func (t *TaskDB) Insert(name, project string) error {
+	_, err := t.DB.Exec(
+		"INSERT INTO tasks(name, project, status, created) VALUES(?, ?, ?, ?)",
+		name,
+		project,
+		todo.String(),
+		time.Now())
+
+	return err
 }
